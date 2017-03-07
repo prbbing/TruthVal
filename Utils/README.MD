@@ -1,0 +1,1 @@
+Atlas style setups 
