@@ -55,7 +55,7 @@ EL::StatusCode TruthReader :: histInitialize ()
   // trees.  This method gets called before any input files are
   // connected.
 
-  // Acceptance
+  // Call Hist to import the paraeters for the histograms and initialize the hitograms
   Hist *h = new Hist();
   h->setParameters(); 
   map<string, vector<double>>::iterator it; 
@@ -147,24 +147,22 @@ EL::StatusCode TruthReader :: execute ()
     v_jet.push_back(jet);
   }
 
-
-  //----------------------------
-  // Compute selection variable
-  //--------------------------- 
-  if ((int)v_jet.size() > 3){
   // Compute Number b-jets
   int N_bjet =0;
   for( int i_jet = 0 ; i_jet < (int)v_jet.size() ; i_jet++ ) {
     if( abs( v_jet.at(i_jet)->auxdata<int>("PartonTruthLabelID") ) == 5 )
       N_bjet++;
   }
-  // Compute mjj
+  // Get mc weights
   Double_t mcWeight = eventInfo->mcEventWeight();
+  //Histograms are filled by the function fillOneDHistogram 
   if ((int)v_jet.size() >= 1) {
     fillOneDHistogram(1, v_jet, oneDHistograms, mcWeight); 
   }  
   if ((int)v_jet.size() >= 2) { 
+    //fill the histograms for the 2nd jet
     fillOneDHistogram(2, v_jet, oneDHistograms, mcWeight); 
+    //fill the histograms for the 1st and 2nd jet pair
     fillOneDHistogram(12, v_jet, oneDHistograms, mcWeight); 
   }  
   if ((int)v_jet.size() >= 3) { 
@@ -177,11 +175,7 @@ EL::StatusCode TruthReader :: execute ()
     fillOneDHistogram(14, v_jet, oneDHistograms, mcWeight); 
     fillOneDHistogram(24, v_jet, oneDHistograms, mcWeight); 
     fillOneDHistogram(34, v_jet, oneDHistograms, mcWeight); 
-  }  
-  //----------------------------
-  // Fill Histograms
-  //--------------------------- 
-  }
+   }  
   for( int i = 0 ; i < (int)v_jet.size(); i++)
     delete v_jet[i];
   
@@ -238,18 +232,22 @@ EL::StatusCode TruthReader :: histFinalize ()
   return EL::StatusCode::SUCCESS;
 }
 
+//fillOneDHistogram gets the index, the vector of histograms, the vector of objects and the weights 
 void TruthReader::fillOneDHistogram(int index, vector<xAOD::Jet*> jets, vector<TH1D*> hists, double weight){
   for (int i = 0; i < (int)hists.size(); i++){
     string name = hists.at(i)->GetName();
     string variable = getStringSegments(name,'_').at(0);
     int objIndex = atoi(getStringSegments(name,'_').at(1).c_str());
+    //for single object, the index is a single digit number, for instance, 1 refers to 1st jet 
     if (objIndex < 10 && objIndex == index)
       hists.at(i)->Fill(findSingleVariable(jets.at(index - 1),variable), weight);
+    //for a pair of object, the index is a double dight number, for instance 12 refers to 1st - 2nd jet pair
     if (objIndex >= 10 && objIndex == index)
       hists.at(i)->Fill(findPairVariable(jets.at((int)(index/10) - 1),jets.at(index - 10*(int)(index/10) - 1),variable), weight);
   }
 }
 
+//retreive variables of a single object
 double TruthReader::findSingleVariable(xAOD::Jet* jet, string var){
   double value = 0;
   if (var == "pt")  value =  (double)jet->pt()*0.001;
@@ -259,6 +257,7 @@ double TruthReader::findSingleVariable(xAOD::Jet* jet, string var){
   return value;
 }
 
+//retreive variables of a pair object
 double TruthReader::findPairVariable(xAOD::Jet* jet1, xAOD::Jet* jet2,string var){
   double value = 0;
   TLorentzVector j_1 = TLorentzVector(jet1->px(), jet1->py(), jet1->pz(), jet1->e());  
@@ -270,6 +269,7 @@ double TruthReader::findPairVariable(xAOD::Jet* jet1, xAOD::Jet* jet2,string var
   return value;
 }
 
+//split a string by _ and get a vector
 vector<string>
 TruthReader::getStringSegments(string input, char delim)
 {

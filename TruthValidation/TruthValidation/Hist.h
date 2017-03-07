@@ -10,6 +10,7 @@ class Hist {
   public:
     map<string, vector<double>> oneDHistogramPara;
     map<string, vector<double>> twoDHistogramPara;
+    //Define the binnings for a given variable
     vector<double> mjjBinning = {150,0,7500};
     vector<double> pTBinning = {150,0,3000};
     vector<double> etaBinning = {100,-5,5};

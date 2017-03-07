@@ -3,6 +3,7 @@
 Hist::Hist() {}
 
 void Hist::setParameters() {
+    //Add histogram settings, the name of the histogram is in a form of X_Y, X refers to the variables, which are defined in findSingleVariables and findPairVariables functions of TruthReader.cxx 
     oneDHistogramPara.insert(pair<string, vector<double>>("pt_1",pTBinning));     
     oneDHistogramPara.insert(pair<string, vector<double>>("pt_2",pTBinning));     
     oneDHistogramPara.insert(pair<string, vector<double>>("pt_3",pTBinning));     

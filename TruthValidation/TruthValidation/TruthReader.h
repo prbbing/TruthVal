@@ -32,6 +32,7 @@ class TruthReader : public EL::Algorithm
 
 private:
 
+  //Has to be vector<TH1D*> instead of vector<TH1D> otherwise histograms will not be filled in the output file
   vector<TH1D*> oneDHistograms; //!
 
 public:
